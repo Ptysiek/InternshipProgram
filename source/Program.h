@@ -3,10 +3,11 @@
 #include <exception>
 #include <experimental/filesystem>  
     // Neither GCC(7.5 - 2019) nor Clang(6.0.0 - 2018) has a <filesystem> yet.
-    // Needs to be linked with static library: 'libstdc++fs.a' [-lstdc++fs].
-    // Or You can use GCC(9 - 2020)
+    // Needs to be linked with static library: GCC[-lstdc++fs] or LLVM/Clang[-lc++fs].
+    // Or You can use GCC(9.0 - 2020)
 #include <iostream>
 #include <string>
+#include <vector>
 
 #include "Event.h"
 #include "InputOutput.h"
@@ -19,12 +20,14 @@ class Program {
     const std::string _targetFolder;
     Path _path;
 
+    InputOutput _stream;
 
 public:
     explicit Program(const int argc, const char* const * const argv):
         _isInitializable(argc > 1),
         _targetFolder(initTargetFolder(argv)),
-        _path(_targetFolder)
+        _path(_targetFolder),
+        _stream()
     {}
     
     void execute() {
@@ -33,8 +36,24 @@ public:
             return;
         }
         
-        std::cout << _path << "\n\n";
+        auto vctr = _stream.readPaths(_path.path().c_str());
 
+        for (const auto& path : vctr) {
+            std::cout << path << "\n";
+        }
+        std::cout << "\n\n";
+
+
+        //using namespace std::experimental;
+        //std::cout << _path.last_write_time() << "\n\n";
+        //std::cout << filesystem::last_write_time(_path) << "\n\n";
+        //auto time = filesystem::last_write_time(_path);
+        //auto timeb = filesystem::last_write_time(_path);
+        
+        //std::cout << (time == timeb);
+        //std::cout << _path << "\n";
+        //std::cout << _path.path() << "\n";
+        //std::cout << _path.path().c_str() << "\n";
     }
 
 
@@ -53,7 +72,7 @@ private:
             std::cerr << "No argument was given.\n";
             return false;
         }
-        const auto& status = _path.status();
+        const auto status = _path.status();
 
         if (!filesystem::status_known(status)) {
             throw std::logic_error("Program::validateTargetFolder: Unknown Status.");
