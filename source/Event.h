@@ -13,14 +13,15 @@ struct Event {
 
     std::string log() const {
         std::stringstream result;
-        result << (_isFolder)? "Folder " : "File "
+        result << ((_isFolder)? "Folder " : "File ")
             << "\'" << _fileLocation << "\' "
             << "is " << to_string(_type) << ".";
         return result.str();
     }
 
+
 private:
-    std::string to_string(const Type type) {
+    std::string to_string(const Type type) const {
         switch(type) {
         case Created:
             return "Created";
