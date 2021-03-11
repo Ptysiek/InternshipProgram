@@ -28,7 +28,6 @@ public:
         if (!directory) {
             throw std::logic_error("InputOutput::readPaths: Cannot Read Given Path:  [" + path + "]");
         }
-
         std::vector<std::string> result;
         struct dirent* entry;
         while ((entry = readdir(directory)) != NULL) {
@@ -46,13 +45,12 @@ public:
         if (!read || !read.is_open()) {
             throw std::logic_error("InputOutput::readFile: Cannot Read Given Path:  [" + path + "]");
         }
-        std::stringstream result; 
-        std::copy(
-            std::istreambuf_iterator<char>(read), 
-            std::istreambuf_iterator<char>(),
-            std::ostreambuf_iterator<char>(result));
+        std::string result; 
+        while (read) {
+            read >> result;
+        }
         read.close();
-        return result.str();
+        return result;
     }
 
     //#######################################################################################################
@@ -88,8 +86,8 @@ private:
     void streamToLog(
         const std::string& log, 
         const std::string& logTarget,
-        const std::string& logType = std::string()
-    ) const {
+        const std::string& logType = std::string()) const 
+    {
         std::ofstream logOutput(logTarget, std::ios_base::app);
         if (!logOutput || !logOutput.is_open()) {
             throw std::logic_error("InputOutput::writeToLog: Cannot Write Given Log:  [" + log + "]");
