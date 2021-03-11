@@ -60,5 +60,8 @@ public:
         logOutput.close();
     }
 
+    void writeToUser(const Event& event) const {
+        std::cout << "  " << event.log() << "\n";
+    }
 };
 

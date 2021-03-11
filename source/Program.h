@@ -108,10 +108,12 @@ private:
                     if (j == newFiles.end()) {
                         Event event {Event::Type::Deleted, file.name()};
                         _stream.writeToLog(event);
+                        _stream.writeToUser(event);
                     }
                     else {
                         Event event {Event::Type::Renamed, file.name()};
                         _stream.writeToLog(event);
+                        _stream.writeToUser(event);
                         *j = newFiles.back();
                         newFiles.pop_back();
                     }
@@ -119,11 +121,13 @@ private:
                 else if (i->second.modificationTime() != file.modificationTime()) {
                     Event event {Event::Type::Edited, file.name()};
                     _stream.writeToLog(event);
+                    _stream.writeToUser(event);
                 }
             }
             for (const auto& file : newFiles) {
                 Event event {Event::Type::Created, file.name()};
                 _stream.writeToLog(event);
+                _stream.writeToUser(event);
             }
             std::swap(_filesState, latestFilesState);
         }
