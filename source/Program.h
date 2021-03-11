@@ -96,8 +96,10 @@ private:
             for (auto& [key, file] : _filesState) {
                 const auto i = latestFilesState.find(key);
                 if (i == latestFilesState.end()) {
-                    auto j = std::find_if(begin(newFiles), end(newFiles), 
-                        [file](const auto& newFile){ return (newFile.data() == file.data()); });
+                    auto compareFileData = [file](const auto& newFile) { 
+                        return (newFile.data() == file.data());
+                    }; 
+                    auto j = std::find_if(newFiles.begin(), newFiles.end(), compareFileData);
                     
                     if (j == newFiles.end()) {
                         Event event {Event::Type::Deleted, file.name()};
@@ -129,21 +131,11 @@ private:
 
     //#######################################################################################################
     std::pair<FilesState, bool> tryCaptureFilesState() const {
-        using FileSystemError = std::experimental::filesystem::v1::__cxx11::filesystem_error;
-        
         FilesState latestFilesState;
         bool success = true;
         try {
             latestFilesState = captureFilesState();
         } 
-        catch(const FileSystemError& e) { 
-            _stream.writeToLog(e.what(), "Warning:  ");
-            success = false;
-        }
-        catch(const std::logic_error& e) {
-            _stream.writeToLog(e.what(), "Warning:  ");
-            success = false;
-        }
         catch(const std::exception& e) {
             _stream.writeToLog(e.what(), "Warning:  ");
             success = false;
@@ -172,6 +164,5 @@ private:
         }
         return result;
     }
-    //#######################################################################################################
 };
 
