@@ -6,7 +6,6 @@
     // Neither GCC(7.5 - 2019) nor Clang(6.0.0 - 2018) has a <filesystem> yet.
     // Needs to be linked with static library: GCC[-lstdc++fs] or LLVM/Clang[-lc++fs].
     // Or You can use GCC(9.0 - 2020)
-#include <iostream>
 #include <map>
 #include <string>
 #include <vector>
@@ -36,7 +35,7 @@ public:
     
     void execute() {
         if (!validateTarget()) {
-            waitForUserInput();
+            _stream.waitForUserInput();
             return;
         }
         mainLogicLoop();
@@ -67,7 +66,7 @@ private:
         using namespace std::experimental;
         
         if (_target == std::string()) {
-            std::cerr << "No argument was given.\n";
+            _stream.writeToUser("No argument was given.");
             return false;
         }
         const auto status = _target.status();
@@ -76,19 +75,14 @@ private:
             throw std::logic_error("Program::validateTarget: Unknown Status.\n");
         }
         if (!filesystem::exists(status)) {
-            std::cerr << "Specified path does not exist. " << _target << "\n";
+            _stream.writeToUser("Specified path does not exist. \"" + _targetPath + "\""); 
             return false;
         }
         if (!filesystem::is_directory(status)) {
-            std::cerr << "Specified path is not a directory. " << _target << "\n";
+            _stream.writeToUser("Specified path is not a directory. \"" + _targetPath + "\"");  
             return false;
         }
         return true;
-    }
-
-    void waitForUserInput() const {
-        std::cerr << "Press [enter] to continue.   ";
-        std::cin.get();
     }
 
     void mainLogicLoop() {
@@ -143,15 +137,15 @@ private:
             latestFilesState = captureFilesState();
         } 
         catch(const FileSystemError& e) { 
-            std::cerr << e.what() << "\n";
+            _stream.writeToLog(e.what(), "Warning:  ");
             success = false;
         }
         catch(const std::logic_error& e) {
-            std::cerr << e.what() << "\n";
+            _stream.writeToLog(e.what(), "Warning:  ");
             success = false;
         }
         catch(const std::exception& e) {
-            std::cerr << e.what() << "\n";
+            _stream.writeToLog(e.what(), "Warning:  ");
             success = false;
         }
         return {latestFilesState, success};

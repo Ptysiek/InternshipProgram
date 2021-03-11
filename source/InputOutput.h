@@ -1,6 +1,7 @@
 #pragma once
 
 #include <dirent.h>
+#include <iostream>
 #include <fstream>
 #include <sstream>
 #include <string>
@@ -22,7 +23,7 @@ public:
         DIR* directory;
         directory = opendir(path.c_str());
         if (!directory) {
-            throw std::logic_error("InputOutput::readPaths: Cannot Read Given Path: " + path + ".\n");
+            throw std::logic_error("InputOutput::readPaths: Cannot Read Given Path:  \"" + path + "\"\n");
         }
 
         std::vector<std::string> result;
@@ -40,7 +41,7 @@ public:
     std::string readFile(const std::string& path) const {
         std::ifstream read(path);        
         if (!read || !read.is_open()) {
-            throw std::logic_error("InputOutput::readFile: Cannot Read Given Path: " + path + ".\n");
+            throw std::logic_error("InputOutput::readFile: Cannot Read Given Path:  \"" + path + "\"\n");
         }
         std::stringstream result; 
         std::copy(
@@ -52,16 +53,29 @@ public:
     }
 
     void writeToLog(const Event& event) const {
+        writeToLog(event.log()); 
+    }
+    
+    void writeToLog(const std::string& log, const std::string& logType = std::string()) const {
         std::ofstream logOutput(_outputLogTarget, std::ios_base::app);
         if (!logOutput || !logOutput.is_open()) {
-            throw std::logic_error("InputOutput::writeToLog: Cannot Write to Given Event: " + event.log() + ".\n");
+            throw std::logic_error("InputOutput::writeToLog: Cannot Write Given Log:  \"" + log + "\"\n");
         }
-        logOutput << event.log() << "\n";
+        logOutput << logType << log << "\n";
         logOutput.close();
     }
 
     void writeToUser(const Event& event) const {
-        std::cout << "  " << event.log() << "\n";
+        writeToUser("  " + event.log());
+    }
+
+    void writeToUser(const std::string& log) const {
+        std::cout << log << "\n";
+    }
+    
+    void waitForUserInput() const {
+        writeToUser("Press [enter] to continue.   ");
+        std::cin.get();
     }
 };
 
