@@ -35,47 +35,8 @@ public:
             waitForUserInput();
             return;
         }
-        auto fileState = captureFilesState();
-
-        std::cout << "----------------------------------------\n"
-            << "Given target: " << _target << "\n"
-            << "modified files:\n";
-        //for (const auto& [key, file] : fileState) {
-        //    std::cout << "  " << file.beenModified() << " " << key << "\n";
-        //}   
-     
-        while (true) {
-            auto latestFileState = captureFilesState();
-
-            
-            
-            for (const auto& [key, file] : fileState) {
-                auto it = latestFileState.find(key);
-                
-                if (it->second.modificationTime() != file.modificationTime()) {
-                    
-                }
-
-            }
-        }
-
-        //auto a = std::system("clear");
-        //std::cout << a;
-        //if (const auto errorCode = std::system("clear"); errorCode != 0) {
-        //    throw std::logic_error("Program::execute: system returned error: " + std::to_string(errorCode));
-        //}
-
-
-        //using namespace std::experimental;
-        //std::cout << _path.last_write_time() << "\n\n";
-        //std::cout << filesystem::last_write_time(_path) << "\n\n";
-        //auto time = filesystem::last_write_time(_path);
-        //auto timeb = filesystem::last_write_time(_path);
-        
-        //std::cout << (time == timeb);
-        //std::cout << _path << "\n";
-        //std::cout << _path.path() << "\n";
-        //std::cout << _path.path().c_str() << "\n";
+        std::cout << "----------------------------------------\n";
+        mainLogicLoop();
     }
 
 
@@ -99,11 +60,6 @@ private:
     }
     
     //#######################################################################################################
-    void waitForUserInput() {
-        std::cerr << "Press [enter] to continue.   ";
-        std::cin.get();
-    }
-
     bool validateTarget() {
         using namespace std::experimental;
         
@@ -127,6 +83,32 @@ private:
         return true;
     }
     
+    void waitForUserInput() {
+        std::cerr << "Press [enter] to continue.   ";
+        std::cin.get();
+    }
+
+    void mainLogicLoop() {
+        auto fileState = captureFilesState();
+        while (true) {
+            auto latestFileState = captureFilesState();
+
+            for (auto& [key, file] : fileState) {
+                const auto it = latestFileState.find(key);
+
+                if (it == latestFileState.end()) {
+                    std::cout << file.name();
+                }
+
+                if (it->second.modificationTime() != file.modificationTime()) {
+                    file.setMeta(it->second.meta());
+                    std::cout << "  " << file.name() << "  [Modified]\n";
+                }
+            }
+        }
+    }
+
+    //#######################################################################################################
     std::map<std::string, File> captureFilesState() {
         using namespace std::experimental;
         
@@ -139,11 +121,6 @@ private:
             }
             const auto data = _stream.readFile(_targetPath + path);
             result.insert({path, File(meta, data)}); 
-            //result[path] = {File(meta, data)};
-            //const auto success = result.insert({path, File(meta, data)}); //karasunoPlayerHeights.insert(*it_hinata);
-            //if (success.second == false) {
-            //    throw std::logic_error("Program::captureFilesState: Equal File Names.\n");
-            //}
         }
         return result;
     }

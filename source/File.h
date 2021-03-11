@@ -13,19 +13,22 @@ class File {
 
     DirectoryEntry _meta;
     std::string _latestData;
-    bool _beenModified; 
-    
+    ModificationTime _modificationTime;
 
 public:
     explicit File(const DirectoryEntry& meta, const std::string& data):
         _meta(meta),
         _latestData(data),
-        _beenModified(false)
+        _modificationTime(std::experimental::filesystem::last_write_time(_meta))
     {}
 
+    DirectoryEntry meta() const { return _meta; }
     std::string name() const { return _meta.path().c_str(); }
-    bool beenModified() const { return _beenModified; }
-    ModificationTime modificationTime() const { return std::experimental::filesystem::last_write_time(_meta); }
-
+    ModificationTime modificationTime() const { return _modificationTime; }
+    
+    void setMeta(const DirectoryEntry& meta) { 
+        _meta = meta; 
+        _modificationTime = std::experimental::filesystem::last_write_time(_meta);
+    } 
 
 };
