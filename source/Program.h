@@ -17,7 +17,6 @@
 class Program {
     using Path = std::experimental::filesystem::directory_entry;
 
-    const bool _isInitializable;
     const std::string _targetFolder;
     Path _path;
 
@@ -26,8 +25,7 @@ class Program {
 
 public:
     explicit Program(const int argc, const char* const * const argv):
-        _isInitializable(argc > 1),
-        _targetFolder(initTargetFolder(argv)),
+        _targetFolder(initTargetFolder(argc, argv)),
         _path(_targetFolder),
         _stream()
     {}
@@ -63,8 +61,8 @@ public:
 
 
 private:
-    std::string initTargetFolder(const char* const * const argv) {
-        if (_isInitializable) {
+    std::string initTargetFolder(const int argc, const char* const * const argv) {
+        if (argc > 1) {
             return argv[1];
         }
         return std::string();   
@@ -78,7 +76,7 @@ private:
     bool validateTargetFolder() {
         using namespace std::experimental;
         
-        if (!_isInitializable) {
+        if (_path == std::string()) {
             std::cerr << "No argument was given.\n";
             return false;
         }
