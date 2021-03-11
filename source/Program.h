@@ -99,9 +99,8 @@ private:
                 if (it == latestFileState.end()) {
                     std::cout << file.name();
                 }
-
-                if (it->second.modificationTime() != file.modificationTime()) {
-                    file.setMeta(it->second.meta());
+                else if (it->second.modificationTime() != file.modificationTime()) {
+                    std::swap(it->second, file);
                     std::cout << "  " << file.name() << "  [Modified]\n";
                 }
             }

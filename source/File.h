@@ -25,10 +25,4 @@ public:
     DirectoryEntry meta() const { return _meta; }
     std::string name() const { return _meta.path().c_str(); }
     ModificationTime modificationTime() const { return _modificationTime; }
-    
-    void setMeta(const DirectoryEntry& meta) { 
-        _meta = meta; 
-        _modificationTime = std::experimental::filesystem::last_write_time(_meta);
-    } 
-
 };
