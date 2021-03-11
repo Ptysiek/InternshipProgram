@@ -43,7 +43,10 @@ public:
         }
         std::cout << "\n\n";
 
+        auto test = _stream.readFile("../source/main.cpp");
 
+        std::cout << test;
+        
         //using namespace std::experimental;
         //std::cout << _path.last_write_time() << "\n\n";
         //std::cout << filesystem::last_write_time(_path) << "\n\n";
@@ -75,7 +78,7 @@ private:
         const auto status = _path.status();
 
         if (!filesystem::status_known(status)) {
-            throw std::logic_error("Program::validateTargetFolder: Unknown Status.");
+            throw std::logic_error("Program::validateTargetFolder: Unknown Status.\n");
         }
         if (!filesystem::exists(status)) {
             std::cerr << "Specified path does not exist. \'" << _targetFolder << "\'\n";

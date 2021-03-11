@@ -1,49 +1,46 @@
 #pragma once
 
+#include <dirent.h>
+#include <fstream>
+#include <sstream>
 #include <string>
 #include <vector>
 
-#include <fstream>
-#include <dirent.h>
-
-
 
 struct InputOutput {
-    std::vector<std::string> readPaths(const std::string& targetPath) {
-        std::vector<std::string> result;
+    std::vector<std::string> readPaths(const std::string& path) const {
         DIR* directory;
-        directory = opendir(targetPath.c_str());
+        directory = opendir(path.c_str());
 
         if (!directory) {
-            return result;
+            throw std::logic_error("InputOutput::readPaths: Cannot read given folder path: " + path + ".\n");
         }
+        std::vector<std::string> result;
         struct dirent* entry;
         while ((entry = readdir(directory)) != NULL) {
-            const std::string data = entry->d_name;
-            if (data == "." || data == "..") {
-                continue;
+            const auto data = static_cast<std::string>(entry->d_name);
+            if (data != "." && data != "..") {
+                result.emplace_back(data);
             }
-            result.push_back(data);
         }
         closedir(directory);
         return result;
     }
 
-    std::string readFile(const std::string& path) {
-        std::ifstream readFile(path);        
-        if (!readFile || !readFile.is_open()) {
-            throw std::logic_error("Cannot read given file path: " + path + "\n");
+    std::string readFile(const std::string& path) const {
+        std::ifstream read(path);        
+        if (!read || !read.is_open()) {
+            throw std::logic_error("InputOutput::readFile: Cannot read given file path: " + path + ".\n");
         }
-
-        //std::string result(readFile.rdbuf());
+        std::stringstream result; 
         
-        std::string result(readFile.beg, readFile.end);
-        //std::string record;
-        //while (std::getline(readFile, record)) {
-        //    result.push_back(record);
-        //}
-        readFile.close();
-        return result;
+        std::copy(
+            std::istreambuf_iterator<char>(read), 
+            std::istreambuf_iterator<char>(),
+            std::ostreambuf_iterator<char>(result));
+        
+        read.close();
+        return result.str();
     }
 };
 
