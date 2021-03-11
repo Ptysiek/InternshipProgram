@@ -9,10 +9,12 @@
 
 class File {
     using DirectoryEntry = std::experimental::filesystem::directory_entry;
+    using ModificationTime = std::experimental::filesystem::file_time_type;
 
     DirectoryEntry _meta;
     std::string _latestData;
     bool _beenModified; 
+    
 
 public:
     explicit File(const DirectoryEntry& meta, const std::string& data):
@@ -23,6 +25,7 @@ public:
 
     std::string name() const { return _meta.path().c_str(); }
     bool beenModified() const { return _beenModified; }
+    ModificationTime modificationTime() const { return std::experimental::filesystem::last_write_time(_meta); }
+
 
 };
-

@@ -13,7 +13,7 @@ struct InputOutput {
         directory = opendir(path.c_str());
 
         if (!directory) {
-            throw std::logic_error("InputOutput::readPaths: Cannot read given folder path: " + path + ".\n");
+            throw std::logic_error("InputOutput::readPaths: Cannot Read Given Path: " + path + ".\n");
         }
         std::vector<std::string> result;
         struct dirent* entry;
@@ -30,7 +30,7 @@ struct InputOutput {
     std::string readFile(const std::string& path) const {
         std::ifstream read(path);        
         if (!read || !read.is_open()) {
-            throw std::logic_error("InputOutput::readFile: Cannot read given file path: " + path + ".\n");
+            throw std::logic_error("InputOutput::readFile: Cannot Read Given Path: " + path + ".\n");
         }
         std::stringstream result; 
         

@@ -6,6 +6,7 @@
     // Needs to be linked with static library: GCC[-lstdc++fs] or LLVM/Clang[-lc++fs].
     // Or You can use GCC(9.0 - 2020)
 #include <iostream>
+#include <map>
 #include <string>
 #include <vector>
 
@@ -34,14 +35,30 @@ public:
             waitForUserInput();
             return;
         }
-        
         auto fileState = captureFilesState();
 
-        
-        for (const auto& file : fileState) {
-            std::cout << file.beenModified() << " " << file.name() << "\n";
-        }   
-        
+        std::cout << "----------------------------------------\n"
+            << "Given target: " << _target << "\n"
+            << "modified files:\n";
+        //for (const auto& [key, file] : fileState) {
+        //    std::cout << "  " << file.beenModified() << " " << key << "\n";
+        //}   
+     
+        while (true) {
+            auto latestFileState = captureFilesState();
+
+            
+            
+            for (const auto& [key, file] : fileState) {
+                auto it = latestFileState.find(key);
+                
+                if (it->second.modificationTime() != file.modificationTime()) {
+                    
+                }
+
+            }
+        }
+
         //auto a = std::system("clear");
         //std::cout << a;
         //if (const auto errorCode = std::system("clear"); errorCode != 0) {
@@ -63,6 +80,7 @@ public:
 
 
 private:
+    //#######################################################################################################
     std::string initTarget(const int argc, const char* const * const argv) {
         if (argc > 1) {
             return argv[1];
@@ -80,6 +98,7 @@ private:
         return result;
     }
     
+    //#######################################################################################################
     void waitForUserInput() {
         std::cerr << "Press [enter] to continue.   ";
         std::cin.get();
@@ -108,20 +127,26 @@ private:
         return true;
     }
     
-    std::vector<File> captureFilesState() {
+    std::map<std::string, File> captureFilesState() {
         using namespace std::experimental;
         
-        std::vector<File> result;
+        std::map<std::string, File> result;
         auto paths = _stream.readPaths(_targetPath);
         for (const auto& path : paths) {
             DirectoryEntry meta(_targetPath + path);
             if (filesystem::is_directory(meta.status())) {
                 continue;
             }
-            auto data = _stream.readFile(_targetPath + path);
-            result.emplace_back(File(meta, data));
+            const auto data = _stream.readFile(_targetPath + path);
+            result.insert({path, File(meta, data)}); 
+            //result[path] = {File(meta, data)};
+            //const auto success = result.insert({path, File(meta, data)}); //karasunoPlayerHeights.insert(*it_hinata);
+            //if (success.second == false) {
+            //    throw std::logic_error("Program::captureFilesState: Equal File Names.\n");
+            //}
         }
         return result;
     }
+    //#######################################################################################################
 };
 
