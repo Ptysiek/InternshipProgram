@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "Event.h"
+#include "File.h"
 #include "InputOutput.h"
 
 
@@ -21,6 +22,7 @@ class Program {
     Path _path;
 
     InputOutput _stream;
+
 
 public:
     explicit Program(const int argc, const char* const * const argv):
@@ -67,6 +69,11 @@ private:
         }
         return std::string();   
     }
+    
+    void waitForUserInput() {
+        std::cerr << "Press [enter] to continue.   ";
+        std::cin.get();
+    }
 
     bool validateTargetFolder() {
         using namespace std::experimental;
@@ -90,10 +97,9 @@ private:
         }
         return true;
     }
+    
+    void captureFilesState() {
 
-    void waitForUserInput() {
-        std::cerr << "Press [enter] to continue.   ";
-        std::cin.get();
     }
 };
 
