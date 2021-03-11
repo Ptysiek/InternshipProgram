@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 
-#set (CMAKE_C_COMPILER "/usr/bin/clang")
-#set (CMAKE_CXX_COMPILER "/usr/bin/clang++")
+#set(CMAKE_C_COMPILER "/usr/bin/clang")
+#set(CMAKE_CXX_COMPILER "/usr/bin/clang++")
 set(CMAKE_C_COMPILER "/usr/bin/gcc")
 set(CMAKE_CXX_COMPILER "/usr/bin/g++")
 set(CMAKE_CXX_STANDARD 17)
@@ -37,5 +37,6 @@ target_compile_options(${PROJECT_NAME} PRIVATE ${THIS_PROJECT_FLAGS})
 # enable standard cpp17
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
 
+# link <filesystem> static library
 target_link_libraries(${PROJECT_NAME} stdc++fs)
 
