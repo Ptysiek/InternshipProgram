@@ -25,12 +25,13 @@ class Program {
     const std::string _targetPath;
     const InputOutput _stream;
 
+
 public:
     explicit Program(const int argc, const char* const * const argv):
         _filesState(),
         _target(initTarget(argc, argv)),
         _targetPath(initTargetPath()),
-        _stream()
+        _stream("logs.txt")
     {}
     
     void execute() {
@@ -103,21 +104,26 @@ private:
                 if (i == latestFilesState.end()) {
                     auto j = std::find_if(begin(newFiles), end(newFiles), 
                         [file](const auto& newFile){ return (newFile.data() == file.data()); });
+                    
                     if (j == newFiles.end()) {
-                        std::cout << "  \"" << file.name() << "\"    [Deleted]\n";
+                        Event event {Event::Type::Deleted, file.name()};
+                        _stream.writeToLog(event);
                     }
                     else {
-                        std::cout << "  \"" << file.name() << "\"    [Renamed]\n";
+                        Event event {Event::Type::Renamed, file.name()};
+                        _stream.writeToLog(event);
                         *j = newFiles.back();
                         newFiles.pop_back();
                     }
                 }
                 else if (i->second.modificationTime() != file.modificationTime()) {
-                    std::cout << "  \"" << file.name() << "\"    [Edited]\n";
+                    Event event {Event::Type::Edited, file.name()};
+                    _stream.writeToLog(event);
                 }
             }
             for (const auto& file : newFiles) {
-                std::cout << "  \"" << file.name() << "\"    [Created]\n";
+                Event event {Event::Type::Created, file.name()};
+                _stream.writeToLog(event);
             }
             std::swap(_filesState, latestFilesState);
         }

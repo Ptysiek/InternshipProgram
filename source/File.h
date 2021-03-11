@@ -27,3 +27,4 @@ public:
     std::string name() const { return _name; } 
     std::string data() const { return _data; }
 };
+

@@ -6,8 +6,18 @@
 #include <string>
 #include <vector>
 
+#include "Event.h"
 
-struct InputOutput {
+
+class InputOutput {
+    const std::string _outputLogTarget;
+    
+
+public:
+    InputOutput(const std::string& outputLogTarget):
+        _outputLogTarget(outputLogTarget)
+    {}
+
     std::vector<std::string> readPaths(const std::string& path) const {
         DIR* directory;
         directory = opendir(path.c_str());
@@ -40,5 +50,15 @@ struct InputOutput {
         read.close();
         return result.str();
     }
+
+    void writeToLog(const Event& event) const {
+        std::ofstream logOutput(_outputLogTarget, std::ios_base::app);
+        if (!logOutput || !logOutput.is_open()) {
+            throw std::logic_error("InputOutput::writeToLog: Cannot Write to Given Event: " + event.log() + ".\n");
+        }
+        logOutput << event.log() << "\n";
+        logOutput.close();
+    }
+
 };
 

@@ -9,13 +9,10 @@ struct Event {
     
     const Type _type;
     const std::string _fileLocation;
-    const bool _isFolder;
 
     std::string log() const {
         std::stringstream result;
-        result << ((_isFolder)? "Folder " : "File ")
-            << "\"" << _fileLocation << "\" "
-            << "is " << to_string(_type) << ".";
+        result << "\"" << _fileLocation << "\"    [" << to_string(_type) << "]";
         return result.str();
     }
 
