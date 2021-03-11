@@ -14,7 +14,7 @@ struct Event {
     std::string log() const {
         std::stringstream result;
         result << ((_isFolder)? "Folder " : "File ")
-            << "\'" << _fileLocation << "\' "
+            << "\"" << _fileLocation << "\" "
             << "is " << to_string(_type) << ".";
         return result.str();
     }

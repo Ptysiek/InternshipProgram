@@ -15,28 +15,25 @@
 
 
 class Program {
-    using Path = std::experimental::filesystem::directory_entry;
+    using DirectoryEntry = std::experimental::filesystem::directory_entry;
 
-    const std::string _targetFolder;
-    Path _path;
-
-    InputOutput _stream;
+    const DirectoryEntry _target;
+    const InputOutput _stream;
 
 
 public:
     explicit Program(const int argc, const char* const * const argv):
-        _targetFolder(initTargetFolder(argc, argv)),
-        _path(_targetFolder),
+        _target(initTarget(argc, argv)),
         _stream()
     {}
     
     void execute() {
-        if (!validateTargetFolder()) {
+        if (!validateTarget()) {
             waitForUserInput();
             return;
         }
         
-        auto vctr = _stream.readPaths(_path.path().c_str());
+        auto vctr = _stream.readPaths(_target.path().c_str());
 
         for (const auto& path : vctr) {
             std::cout << path << "\n";
@@ -61,7 +58,7 @@ public:
 
 
 private:
-    std::string initTargetFolder(const int argc, const char* const * const argv) {
+    std::string initTarget(const int argc, const char* const * const argv) {
         if (argc > 1) {
             return argv[1];
         }
@@ -73,24 +70,24 @@ private:
         std::cin.get();
     }
 
-    bool validateTargetFolder() {
+    bool validateTarget() {
         using namespace std::experimental;
         
-        if (_path == std::string()) {
+        if (_target == std::string()) {
             std::cerr << "No argument was given.\n";
             return false;
         }
-        const auto status = _path.status();
+        const auto status = _target.status();
 
         if (!filesystem::status_known(status)) {
-            throw std::logic_error("Program::validateTargetFolder: Unknown Status.\n");
+            throw std::logic_error("Program::validateTarget: Unknown Status.\n");
         }
         if (!filesystem::exists(status)) {
-            std::cerr << "Specified path does not exist. \'" << _targetFolder << "\'\n";
+            std::cerr << "Specified path does not exist. " << _target << "\n";
             return false;
         }
         if (!filesystem::is_directory(status)) {
-            std::cerr << "Specified path is not a directory. \'" << _targetFolder << "\'\n";
+            std::cerr << "Specified path is not a directory. " << _target << "\n";
             return false;
         }
         return true;
