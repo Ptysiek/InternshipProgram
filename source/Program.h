@@ -18,12 +18,14 @@ class Program {
     using DirectoryEntry = std::experimental::filesystem::directory_entry;
 
     const DirectoryEntry _target;
+    const std::string _targetPath;
     const InputOutput _stream;
 
 
 public:
     explicit Program(const int argc, const char* const * const argv):
         _target(initTarget(argc, argv)),
+        _targetPath(initTargetPath()),
         _stream()
     {}
     
@@ -33,17 +35,20 @@ public:
             return;
         }
         
-        auto vctr = _stream.readPaths(_target.path().c_str());
+        auto fileState = captureFilesState();
 
-        for (const auto& path : vctr) {
-            std::cout << path << "\n";
-        }
-        std::cout << "\n\n";
-
-        auto test = _stream.readFile("../source/main.cpp");
-
-        std::cout << test;
         
+        for (const auto& file : fileState) {
+            std::cout << file.beenModified() << " " << file.name() << "\n";
+        }   
+        
+        //auto a = std::system("clear");
+        //std::cout << a;
+        //if (const auto errorCode = std::system("clear"); errorCode != 0) {
+        //    throw std::logic_error("Program::execute: system returned error: " + std::to_string(errorCode));
+        //}
+
+
         //using namespace std::experimental;
         //std::cout << _path.last_write_time() << "\n\n";
         //std::cout << filesystem::last_write_time(_path) << "\n\n";
@@ -63,6 +68,16 @@ private:
             return argv[1];
         }
         return std::string();   
+    }
+    
+    std::string initTargetPath() {
+        std::string result = _target.path().c_str();
+        return (result.back() == '/')? result : result + '/';
+        
+        if (result.back() != '/') {
+            result += '/';
+        }
+        return result;
     }
     
     void waitForUserInput() {
@@ -93,8 +108,20 @@ private:
         return true;
     }
     
-    void captureFilesState() {
-
+    std::vector<File> captureFilesState() {
+        using namespace std::experimental;
+        
+        std::vector<File> result;
+        auto paths = _stream.readPaths(_targetPath);
+        for (const auto& path : paths) {
+            DirectoryEntry meta(_targetPath + path);
+            if (filesystem::is_directory(meta.status())) {
+                continue;
+            }
+            auto data = _stream.readFile(_targetPath + path);
+            result.emplace_back(File(meta, data));
+        }
+        return result;
     }
 };
 

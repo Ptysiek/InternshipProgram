@@ -10,19 +10,19 @@
 class File {
     using DirectoryEntry = std::experimental::filesystem::directory_entry;
 
-    DirectoryEntry _iNode;
+    DirectoryEntry _meta;
     std::string _latestData;
     bool _beenModified; 
 
 public:
-    explicit File(const std::string& path, const std::string& data):
-        _iNode(path),
+    explicit File(const DirectoryEntry& meta, const std::string& data):
+        _meta(meta),
         _latestData(data),
         _beenModified(false)
     {}
 
-    
-
+    std::string name() const { return _meta.path().c_str(); }
+    bool beenModified() const { return _beenModified; }
 
 };
 
