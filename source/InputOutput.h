@@ -57,7 +57,7 @@ public:
 
     //#######################################################################################################
     void writeToLog(const Event& event) const {
-        streamToLog(event.log(), _logTarget); 
+        streamToLog(event.fullLog(), _logTarget); 
     }
 
     void writeToLog(const std::string& log) const {

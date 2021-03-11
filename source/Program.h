@@ -72,7 +72,7 @@ private:
         const auto status = _target.status();
 
         if (!filesystem::status_known(status)) {
-            throw std::logic_error("Program::validateTarget: Unknown Status.\n");
+            throw std::logic_error("Program::validateTarget: Unknown Status.");
         }
         if (!filesystem::exists(status)) {
             _stream.writeToUser("Specified path does not exist. \"" + _targetPath + "\""); 
