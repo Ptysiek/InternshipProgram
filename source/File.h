@@ -11,19 +11,19 @@ class File {
     using DirectoryEntry = std::experimental::filesystem::directory_entry;
     using ModificationTime = std::experimental::filesystem::file_time_type;
 
-    std::string _name;
     ModificationTime _modificationTime;
+    std::string _name;
     std::string _data;
     
 
 public:
     explicit File(const DirectoryEntry& meta, const std::string& data):
-        _name(meta.path().c_str()),
         _modificationTime(std::experimental::filesystem::last_write_time(meta)),
+        _name(meta.path().c_str()),
         _data(data)
     {}
 
-    std::string name() const { return _name; } 
     ModificationTime modificationTime() const { return _modificationTime; }
+    std::string name() const { return _name; } 
     std::string data() const { return _data; }
 };

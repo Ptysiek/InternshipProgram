@@ -11,10 +11,10 @@ struct InputOutput {
     std::vector<std::string> readPaths(const std::string& path) const {
         DIR* directory;
         directory = opendir(path.c_str());
-
         if (!directory) {
             throw std::logic_error("InputOutput::readPaths: Cannot Read Given Path: " + path + ".\n");
         }
+
         std::vector<std::string> result;
         struct dirent* entry;
         while ((entry = readdir(directory)) != NULL) {
@@ -33,12 +33,10 @@ struct InputOutput {
             throw std::logic_error("InputOutput::readFile: Cannot Read Given Path: " + path + ".\n");
         }
         std::stringstream result; 
-        
         std::copy(
             std::istreambuf_iterator<char>(read), 
             std::istreambuf_iterator<char>(),
             std::ostreambuf_iterator<char>(result));
-        
         read.close();
         return result.str();
     }

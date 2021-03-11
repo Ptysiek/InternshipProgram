@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <exception>
 #include <experimental/filesystem>  
     // Neither GCC(7.5 - 2019) nor Clang(6.0.0 - 2018) has a <filesystem> yet.
@@ -17,14 +18,16 @@
 
 class Program {
     using DirectoryEntry = std::experimental::filesystem::directory_entry;
+    using FilesState = std::map<std::string, File>;
 
+    FilesState _filesState;
     const DirectoryEntry _target;
     const std::string _targetPath;
     const InputOutput _stream;
 
-
 public:
     explicit Program(const int argc, const char* const * const argv):
+        _filesState(),
         _target(initTarget(argc, argv)),
         _targetPath(initTargetPath()),
         _stream()
@@ -35,21 +38,20 @@ public:
             waitForUserInput();
             return;
         }
-        std::cout << "----------------------------------------\n";
         mainLogicLoop();
     }
 
 
 private:
     //#######################################################################################################
-    std::string initTarget(const int argc, const char* const * const argv) {
+    std::string initTarget(const int argc, const char* const * const argv) const {
         if (argc > 1) {
             return argv[1];
         }
         return std::string();   
     }
     
-    std::string initTargetPath() {
+    std::string initTargetPath() const {
         std::string result = _target.path().c_str();
         return (result.back() == '/')? result : result + '/';
         
@@ -60,7 +62,7 @@ private:
     }
     
     //#######################################################################################################
-    bool validateTarget() {
+    bool validateTarget() const {
         using namespace std::experimental;
         
         if (_target == std::string()) {
@@ -82,44 +84,87 @@ private:
         }
         return true;
     }
-    
-    void waitForUserInput() {
+
+    void waitForUserInput() const {
         std::cerr << "Press [enter] to continue.   ";
         std::cin.get();
     }
 
     void mainLogicLoop() {
-        auto fileState = captureFilesState();
+        _filesState = captureFilesState();
         while (true) {
-            auto latestFileState = captureFilesState();
-
-            for (auto& [key, file] : fileState) {
-                const auto it = latestFileState.find(key);
-
-                if (it == latestFileState.end()) {
-                    std::cout << file.name();
+            auto [latestFilesState, success] = tryCaptureFilesState();
+            if (!success) {
+                continue;
+            }
+            auto newFiles = enlistCreatedFiles(latestFilesState);
+            for (auto& [key, file] : _filesState) {
+                const auto i = latestFilesState.find(key);
+                if (i == latestFilesState.end()) {
+                    auto j = std::find_if(begin(newFiles), end(newFiles), 
+                        [file](const auto& newFile){ return (newFile.data() == file.data()); });
+                    if (j == newFiles.end()) {
+                        std::cout << "  \"" << file.name() << "\"    [Deleted]\n";
+                    }
+                    else {
+                        std::cout << "  \"" << file.name() << "\"    [Renamed]\n";
+                        *j = newFiles.back();
+                        newFiles.pop_back();
+                    }
                 }
-                else if (it->second.modificationTime() != file.modificationTime()) {
-                    std::swap(it->second, file);
-                    std::cout << "  " << file.name() << "  [Modified]\n";
+                else if (i->second.modificationTime() != file.modificationTime()) {
+                    std::cout << "  \"" << file.name() << "\"    [Edited]\n";
                 }
             }
+            for (const auto& file : newFiles) {
+                std::cout << "  \"" << file.name() << "\"    [Created]\n";
+            }
+            std::swap(_filesState, latestFilesState);
         }
     }
 
     //#######################################################################################################
-    std::map<std::string, File> captureFilesState() {
-        using namespace std::experimental;
+    std::pair<FilesState, bool> tryCaptureFilesState() const {
+        using FileSystemError = std::experimental::filesystem::v1::__cxx11::filesystem_error;
         
-        std::map<std::string, File> result;
+        FilesState latestFilesState;
+        bool success = true;
+        try {
+            latestFilesState = captureFilesState();
+        } 
+        catch(const FileSystemError& e) { 
+            std::cerr << e.what() << "\n";
+            success = false;
+        }
+        catch(const std::logic_error& e) {
+            std::cerr << e.what() << "\n";
+            success = false;
+        }
+        catch(const std::exception& e) {
+            std::cerr << e.what() << "\n";
+            success = false;
+        }
+        return {latestFilesState, success};
+    }
+    
+    FilesState captureFilesState() const {
+        FilesState result;
         auto paths = _stream.readPaths(_targetPath);
         for (const auto& path : paths) {
-            DirectoryEntry meta(_targetPath + path);
-            if (filesystem::is_directory(meta.status())) {
-                continue;
-            }
+            const DirectoryEntry meta(_targetPath + path);
             const auto data = _stream.readFile(_targetPath + path);
             result.insert({path, File(meta, data)}); 
+        }
+        return result;
+    }
+    
+    std::vector<File> enlistCreatedFiles(const FilesState& latestFilesState) const {
+        std::vector<File> result;
+        result.reserve(latestFilesState.size() / 3);
+        for (auto& [key, file] : latestFilesState) {
+            if (_filesState.find(key) == _filesState.end()) {
+                result.emplace_back(file);
+            }
         }
         return result;
     }
