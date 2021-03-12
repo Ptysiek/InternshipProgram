@@ -16,6 +16,7 @@ private:
     const std::string _date;
     const std::string _time;
 
+
 public:
     Event(const Type& type, const std::string& fileLocation):
         _type(type),

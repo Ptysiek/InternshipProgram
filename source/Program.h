@@ -38,6 +38,7 @@ public:
             _stream.waitForUserInput();
             return;
         }
+        _stream.writeToLog("\nProgram Init. Target Folder: \"" + _targetPath + "\"");
         mainLogicLoop();
     }
 
